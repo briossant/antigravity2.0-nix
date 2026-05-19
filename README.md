@@ -19,10 +19,9 @@ Packages both the **desktop app** and the **CLI** (`agy`), which are not availab
 | Attribute | Binary | Description | Architectures |
 |---|---|---|---|
 | `antigravity-cli` | `agy` | Terminal-first AI coding agent | `x86_64-linux` `aarch64-linux` |
-| `antigravity-desktop` | `antigravity` | Antigravity 2.0 desktop app | `x86_64-linux` |
+| `antigravity-desktop` | `antigravity` | Antigravity 2.0 desktop app | `x86_64-linux` `aarch64-linux` |
 | `default` | `agy` | Alias for `antigravity-cli` | `x86_64-linux` `aarch64-linux` |
 
-> ARM64 for the desktop app is on Google's roadmap.
 
 ---
 

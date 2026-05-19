@@ -63,7 +63,7 @@
 
           # -------------------------------------------------------------- #
           #  Antigravity 2.0 Desktop App - v2.0.0                           #
-          #  Electron app, x86_64 only for now (arm64 not yet released)     #
+          #  Electron app, x86_64-linux + aarch64-linux                     #
           # -------------------------------------------------------------- #
           desktopLibs = with pkgs; [
             alsa-lib
@@ -98,20 +98,30 @@
             libxshmfence
           ];
 
+          desktopSrcs = {
+            x86_64-linux = {
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.0-6324554176528384/linux-x64/Antigravity.tar.gz";
+              hash = "sha256-FLyctIClvo+zt9w+Kwzr+mbTcK1YzB4PoBFA0SBNQpc=";
+              sourceRoot = "Antigravity-x64";
+            };
+            aarch64-linux = {
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.0-6324554176528384/linux-arm/Antigravity.tar.gz";
+              hash = "sha256-Qt9fSfwg2p3weW5/aJENqGh/Awr1PY2ISgp/oiiFceA=";
+              sourceRoot = "Antigravity-arm64";
+            };
+          };
+
           antigravity-desktop =
-            if system != "x86_64-linux"
-            then throw "antigravity-desktop is only available for x86_64-linux (arm64 not yet released by Google)"
-            else pkgs.lib.makeOverridable ({ passwordStore ? "basic" }:
+            pkgs.lib.makeOverridable ({ passwordStore ? "basic" }:
               pkgs.stdenv.mkDerivation {
                 pname = "antigravity-desktop";
                 version = "2.0.0";
 
                 src = pkgs.fetchurl {
-                  url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.0-6324554176528384/linux-x64/Antigravity.tar.gz";
-                  hash = "sha256-FLyctIClvo+zt9w+Kwzr+mbTcK1YzB4PoBFA0SBNQpc=";
+                  inherit (desktopSrcs.${system}) url hash;
                 };
 
-                sourceRoot = "Antigravity-x64";
+                sourceRoot = desktopSrcs.${system}.sourceRoot;
 
                 nativeBuildInputs = [ pkgs.autoPatchelfHook pkgs.makeWrapper ];
                 buildInputs = desktopLibs;
@@ -147,7 +157,7 @@
                   description = "Google Antigravity 2.0 - agent-first development platform";
                   homepage = "https://antigravity.google";
                   license = licenses.unfree;
-                  platforms = [ "x86_64-linux" ];
+                  platforms = [ "x86_64-linux" "aarch64-linux" ];
                   mainProgram = "antigravity";
                 };
               }) {};
@@ -155,10 +165,7 @@
         in
         {
           packages = {
-            inherit antigravity-cli;
-            antigravity-desktop =
-              if system == "x86_64-linux" then antigravity-desktop
-              else null;
+            inherit antigravity-cli antigravity-desktop;
             default = antigravity-cli;
           };
         }
@@ -174,9 +181,7 @@
         antigravity-cli =
           self.packages.${final.system}.antigravity-cli;
         antigravity-desktop =
-          if final.system == "x86_64-linux"
-          then self.packages.${final.system}.antigravity-desktop
-          else null;
+          self.packages.${final.system}.antigravity-desktop;
       };
 
       # ------------------------------------------------------------------ #
@@ -194,8 +199,8 @@
             };
             desktop.enable = lib.mkOption {
               type = lib.types.bool;
-              default = pkgs.stdenv.hostPlatform.system == "x86_64-linux";
-              description = "Install the Antigravity 2.0 desktop app (x86_64 only).";
+              default = true;
+              description = "Install the Antigravity 2.0 desktop app (x86_64-linux and aarch64-linux).";
             };
             desktop.passwordStore = lib.mkOption {
               type = lib.types.enum [ "basic" "gnome-libsecret" "kwallet" "" ];
@@ -215,7 +220,7 @@
               lib.optionals cfg.cli.enable [
                 self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-cli
               ]
-              ++ lib.optionals (cfg.desktop.enable && pkgs.stdenv.hostPlatform.system == "x86_64-linux") [
+              ++ lib.optionals cfg.desktop.enable [
                 (self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-desktop.override {
                   inherit (cfg.desktop) passwordStore;
                 })
