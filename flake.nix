@@ -66,36 +66,7 @@
           then throw "antigravity-desktop is only available for x86_64-linux (arm64 not yet released by Google)"
           else
             let
-              unwrapped = pkgs.stdenv.mkDerivation {
-                pname = "antigravity-desktop-unwrapped";
-                version = "2.0.0";
-
-                src = pkgs.fetchurl {
-                  url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.0-6324554176528384/linux-x64/Antigravity.tar.gz";
-                  hash = "sha256-FLyctIClvo+zt9w+Kwzr+mbTcK1YzB4PoBFA0SBNQpc=";
-                };
-
-                sourceRoot = "Antigravity-x64";
-
-                nativeBuildInputs = [ pkgs.makeWrapper ];
-
-                dontFixup = true;
-
-                installPhase = ''
-                  runHook preInstall
-                  mkdir -p $out/share/antigravity
-                  cp -r . $out/share/antigravity/
-                  # chrome-sandbox must be owned root:root setuid on real systems,
-                  # --no-sandbox is the NixOS-friendly alternative
-                  runHook postInstall
-                '';
-              };
-            in
-            pkgs.buildFHSEnv {
-              name = "antigravity";
-
-              targetPkgs = pkgs: with pkgs; [
-                # Electron / Chromium runtime deps
+              libs = with pkgs; [
                 alsa-lib
                 at-spi2-atk
                 at-spi2-core
@@ -108,6 +79,9 @@
                 glib
                 gtk3
                 libdrm
+                libgbm
+                libGL
+                libglvnd
                 libxkbcommon
                 mesa
                 nss
@@ -123,23 +97,43 @@
                 libxcb
                 libxshmfence
               ];
+            in
+            pkgs.stdenv.mkDerivation {
+              pname = "antigravity-desktop";
+              version = "2.0.0";
 
-              runScript = pkgs.writeShellScript "antigravity-launcher" ''
-                exec ${unwrapped}/share/antigravity/antigravity --no-sandbox "$@"
-              '';
+              src = pkgs.fetchurl {
+                url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.0-6324554176528384/linux-x64/Antigravity.tar.gz";
+                hash = "sha256-FLyctIClvo+zt9w+Kwzr+mbTcK1YzB4PoBFA0SBNQpc=";
+              };
 
-              extraInstallCommands = ''
+              sourceRoot = "Antigravity-x64";
+
+              nativeBuildInputs = [ pkgs.autoPatchelfHook pkgs.makeWrapper ];
+              buildInputs = libs;
+
+              installPhase = ''
+                runHook preInstall
+                mkdir -p $out/share/antigravity
+                cp -r . $out/share/antigravity/
+
+                mkdir -p $out/bin
+                makeWrapper $out/share/antigravity/antigravity $out/bin/antigravity \
+                  --add-flags "--no-sandbox" \
+                  --prefix LD_LIBRARY_PATH : ${pkgs.lib.makeLibraryPath libs}
+
                 mkdir -p $out/share/applications
                 cat > $out/share/applications/antigravity.desktop << EOF
                 [Desktop Entry]
                 Name=Antigravity
                 Comment=Google Antigravity 2.0 - Agent-first development platform
-                Exec=antigravity %U
+                Exec=$out/bin/antigravity %U
                 Terminal=false
                 Type=Application
                 Categories=Development;
                 StartupWMClass=Antigravity
                 EOF
+                runHook postInstall
               '';
 
               meta = with pkgs.lib; {
