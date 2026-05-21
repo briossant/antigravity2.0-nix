@@ -115,13 +115,13 @@
 
           desktopSrcs = {
             x86_64-linux = {
-              url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.0-6324554176528384/linux-x64/Antigravity.tar.gz";
-              hash = "sha256-FLyctIClvo+zt9w+Kwzr+mbTcK1YzB4PoBFA0SBNQpc=";
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.0-5288553236791296/linux-x64/cli_linux_x64.tar.gz";
+              hash = "sha256-cAljQFdPr8SgbE08gFcxTiLUdc4cgg0K1R/wf7fpnrY=";
               sourceRoot = "Antigravity-x64";
             };
             aarch64-linux = {
-              url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.0-6324554176528384/linux-arm/Antigravity.tar.gz";
-              hash = "sha256-Qt9fSfwg2p3weW5/aJENqGh/Awr1PY2ISgp/oiiFceA=";
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.0-5288553236791296/linux-arm/cli_linux_arm64.tar.gz";
+              hash = "sha256-9Nx8lsGDawB2jYpuxurMeFHzQkvW9Ovk2LhIplIHKoU=";
               sourceRoot = "Antigravity-arm64";
             };
           };
