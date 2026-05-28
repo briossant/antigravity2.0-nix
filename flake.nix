@@ -24,18 +24,18 @@
           # -------------------------------------------------------------- #
           cliSrcs = {
             x86_64-linux = {
-              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.2-6109799369277440/linux-x64/cli_linux_x64.tar.gz";
-              hash = "sha256-9sfKgNUJkzO/IpZ2RzvREeDapqDY23xTKt9lA7Dqrck=";
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.3-6260531212976128/linux-x64/cli_linux_x64.tar.gz";
+              hash = "sha256-BH02Ndl7Su7MDcM79SfYQRF50VRDAwA+ifw8uDsNBGI=";
             };
             aarch64-linux = {
-              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.2-6109799369277440/linux-arm/cli_linux_arm64.tar.gz";
-              hash = "sha256-ylqnAh/9ppSybxp5KsllsFPdLOQmzmIbdtk43zlnXfw=";
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.3-6260531212976128/linux-arm/cli_linux_arm64.tar.gz";
+              hash = "sha256-J67B3WJw3UrMb/7kJdjX8oqJaI18ARkf1egM5t/rje0=";
             };
           };
 
           antigravity-cli = pkgs.stdenv.mkDerivation {
             pname = "antigravity-cli";
-            version = "1.0.2";
+            version = "1.0.3";
 
             src = pkgs.fetchurl cliSrcs.${system};
 
@@ -115,13 +115,13 @@
 
           desktopSrcs = {
             x86_64-linux = {
-              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.2-6109799369277440/linux-x64/cli_linux_x64.tar.gz";
-              hash = "sha256-9sfKgNUJkzO/IpZ2RzvREeDapqDY23xTKt9lA7Dqrck=";
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.3-6260531212976128/linux-x64/cli_linux_x64.tar.gz";
+              hash = "sha256-BH02Ndl7Su7MDcM79SfYQRF50VRDAwA+ifw8uDsNBGI=";
               sourceRoot = "Antigravity-x64";
             };
             aarch64-linux = {
-              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.2-6109799369277440/linux-arm/cli_linux_arm64.tar.gz";
-              hash = "sha256-ylqnAh/9ppSybxp5KsllsFPdLOQmzmIbdtk43zlnXfw=";
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.3-6260531212976128/linux-arm/cli_linux_arm64.tar.gz";
+              hash = "sha256-J67B3WJw3UrMb/7kJdjX8oqJaI18ARkf1egM5t/rje0=";
               sourceRoot = "Antigravity-arm64";
             };
           };
