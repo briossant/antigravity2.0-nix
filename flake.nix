@@ -115,13 +115,13 @@
 
           desktopSrcs = {
             x86_64-linux = {
-              url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.0-6324554176528384/linux-x64/Antigravity.tar.gz";
-              hash = "sha256-FLyctIClvo+zt9w+Kwzr+mbTcK1YzB4PoBFA0SBNQpc=";
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/100.0.0-6081531354152960/linux-x64/Antigravity.tar.gz";
+              hash = "sha256-UDWduWkpG9VK9jVZygjK8f/jWreDQBrUzpPjnDdO0Ug=";
               sourceRoot = "Antigravity-x64";
             };
             aarch64-linux = {
-              url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.0-6324554176528384/linux-arm/Antigravity.tar.gz";
-              hash = "sha256-Qt9fSfwg2p3weW5/aJENqGh/Awr1PY2ISgp/oiiFceA=";
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/100.0.0-6081531354152960/linux-arm/Antigravity.tar.gz";
+              hash = "sha256-IGs6p+QKVAxZysryi63cg88ac+FPb7ie9dc6GR0k56o=";
               sourceRoot = "Antigravity-arm64";
             };
           };
@@ -130,7 +130,7 @@
             pkgs.lib.makeOverridable ({ passwordStore ? "basic" }:
               pkgs.stdenv.mkDerivation {
                 pname = "antigravity-desktop";
-                version = "2.0.0";
+                version = "100.0.0";
 
                 src = pkgs.fetchurl {
                   inherit (desktopSrcs.${system}) url hash;
