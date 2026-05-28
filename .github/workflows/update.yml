@@ -59,10 +59,10 @@ jobs:
               rf'\g<1>{version}\2', content)
           content = re.sub(
               r'(x86_64-linux = \{\s+url = ")[^"]+(";\s+hash = ")[^"]+(")',
-              rf'\g<1>{url_x64}\2{hash_x64}\3', content)
+              rf'\g<1>{url_x64}\2{hash_x64}\3', content, count=1)
           content = re.sub(
               r'(aarch64-linux = \{\s+url = ")[^"]+(";\s+hash = ")[^"]+(")',
-              rf'\g<1>{url_arm}\2{hash_arm}\3', content)
+              rf'\g<1>{url_arm}\2{hash_arm}\3', content, count=1)
 
           with open("flake.nix", "w") as f:
               f.write(content)
