@@ -20,7 +20,7 @@ jobs:
             accept-flake-config = true
 
       - name: Fetch CLI manifests and compute hashes
-        id: update
+        id: cli
         run: |
           set -euo pipefail
           MANIFEST_BASE="https://antigravity-cli-auto-updater-974169037036.us-central1.run.app/manifests"
@@ -40,7 +40,43 @@ jobs:
           echo "url_arm=$URL_ARM"   >> "$GITHUB_OUTPUT"
           echo "hash_arm=$HASH_ARM" >> "$GITHUB_OUTPUT"
 
-      - name: Patch flake.nix
+      - name: Fetch desktop manifests and compute hashes
+        id: desktop
+        run: |
+          set -euo pipefail
+          GCS_API="https://storage.googleapis.com/storage/v1/b/antigravity-public/o"
+
+          LATEST=$(curl -fsSL "$GCS_API?prefix=antigravity-hub%2F&delimiter=%2F" | \
+            jq -r '.prefixes[]' | python3 -c "
+          import sys, re
+          lines = [l.strip().rstrip('/') for l in sys.stdin if l.strip()]
+          candidates = []
+          for line in lines:
+              m = re.match(r'antigravity-hub/(\d+)\.(\d+)\.(\d+)-\d+$', line)
+              if m:
+                  v = (int(m.group(1)), int(m.group(2)), int(m.group(3)))
+                  candidates.append((v, line))
+          if candidates:
+              print(max(candidates, key=lambda x: x[0])[1])
+          ")
+
+          BASE="https://storage.googleapis.com/antigravity-public"
+          M_X64=$(curl -fsSL "$BASE/$LATEST/linux-x64/manifest.json")
+          VERSION=$(echo "$M_X64" | jq -r '.name')
+          URL_X64=$(echo "$M_X64" | jq -r '.url')
+          HASH_X64=$(nix store prefetch-file --json "$URL_X64" 2>/dev/null | jq -r '.hash')
+
+          M_ARM=$(curl -fsSL "$BASE/$LATEST/linux-arm/manifest.json")
+          URL_ARM=$(echo "$M_ARM" | jq -r '.url')
+          HASH_ARM=$(nix store prefetch-file --json "$URL_ARM" 2>/dev/null | jq -r '.hash')
+
+          echo "version=$VERSION"   >> "$GITHUB_OUTPUT"
+          echo "url_x64=$URL_X64"   >> "$GITHUB_OUTPUT"
+          echo "hash_x64=$HASH_X64" >> "$GITHUB_OUTPUT"
+          echo "url_arm=$URL_ARM"   >> "$GITHUB_OUTPUT"
+          echo "hash_arm=$HASH_ARM" >> "$GITHUB_OUTPUT"
+
+      - name: Patch flake.nix and README
         run: |
           python3 - <<'EOF'
           import re, os
@@ -48,32 +84,65 @@ jobs:
           with open("flake.nix") as f:
               content = f.read()
 
-          version  = os.environ["VERSION"]
-          url_x64  = os.environ["URL_X64"]
-          hash_x64 = os.environ["HASH_X64"]
-          url_arm  = os.environ["URL_ARM"]
-          hash_arm = os.environ["HASH_ARM"]
+          cli_version  = os.environ["CLI_VERSION"]
+          cli_url_x64  = os.environ["CLI_URL_X64"]
+          cli_hash_x64 = os.environ["CLI_HASH_X64"]
+          cli_url_arm  = os.environ["CLI_URL_ARM"]
+          cli_hash_arm = os.environ["CLI_HASH_ARM"]
 
           content = re.sub(
               r'(pname = "antigravity-cli";\s+version = ")[^"]+(")',
-              rf'\g<1>{version}\2', content)
+              rf'\g<1>{cli_version}\2', content)
           content = re.sub(
               r'(x86_64-linux = \{\s+url = ")[^"]+(";\s+hash = ")[^"]+(")',
-              rf'\g<1>{url_x64}\2{hash_x64}\3', content, count=1)
+              rf'\g<1>{cli_url_x64}\2{cli_hash_x64}\3', content, count=1)
           content = re.sub(
               r'(aarch64-linux = \{\s+url = ")[^"]+(";\s+hash = ")[^"]+(")',
-              rf'\g<1>{url_arm}\2{hash_arm}\3', content, count=1)
+              rf'\g<1>{cli_url_arm}\2{cli_hash_arm}\3', content, count=1)
+
+          desktop_version  = os.environ["DESKTOP_VERSION"]
+          desktop_url_x64  = os.environ["DESKTOP_URL_X64"]
+          desktop_hash_x64 = os.environ["DESKTOP_HASH_X64"]
+          desktop_url_arm  = os.environ["DESKTOP_URL_ARM"]
+          desktop_hash_arm = os.environ["DESKTOP_HASH_ARM"]
+
+          content = re.sub(
+              r'(pname = "antigravity-desktop";\s+version = ")[^"]+(")',
+              rf'\g<1>{desktop_version}\2', content)
+          content = re.sub(
+              r'(x86_64-linux = \{\s+url = ")[^"]+(";\s+hash = ")[^"]+(";\s+sourceRoot)',
+              rf'\g<1>{desktop_url_x64}\2{desktop_hash_x64}\3', content)
+          content = re.sub(
+              r'(aarch64-linux = \{\s+url = ")[^"]+(";\s+hash = ")[^"]+(";\s+sourceRoot)',
+              rf'\g<1>{desktop_url_arm}\2{desktop_hash_arm}\3', content)
 
           with open("flake.nix", "w") as f:
               f.write(content)
-          print(f"Updated CLI to {version}")
+          print(f"Updated CLI to {cli_version}, desktop to {desktop_version}")
+
+          with open("README.md") as f:
+              readme = f.read()
+          readme = re.sub(
+              r'(!\[CLI version\]\(https://img\.shields\.io/badge/agy-)[^-]+(-blue\))',
+              rf'\g<1>{cli_version}\2', readme)
+          readme = re.sub(
+              r'(!\[Desktop version\]\(https://img\.shields\.io/badge/antigravity-)[^-]+(-blue\))',
+              rf'\g<1>{desktop_version}\2', readme)
+          with open("README.md", "w") as f:
+              f.write(readme)
+          print("Updated README badges")
           EOF
         env:
-          VERSION:  ${{ steps.update.outputs.version }}
-          URL_X64:  ${{ steps.update.outputs.url_x64 }}
-          HASH_X64: ${{ steps.update.outputs.hash_x64 }}
-          URL_ARM:  ${{ steps.update.outputs.url_arm }}
-          HASH_ARM: ${{ steps.update.outputs.hash_arm }}
+          CLI_VERSION:      ${{ steps.cli.outputs.version }}
+          CLI_URL_X64:      ${{ steps.cli.outputs.url_x64 }}
+          CLI_HASH_X64:     ${{ steps.cli.outputs.hash_x64 }}
+          CLI_URL_ARM:      ${{ steps.cli.outputs.url_arm }}
+          CLI_HASH_ARM:     ${{ steps.cli.outputs.hash_arm }}
+          DESKTOP_VERSION:  ${{ steps.desktop.outputs.version }}
+          DESKTOP_URL_X64:  ${{ steps.desktop.outputs.url_x64 }}
+          DESKTOP_HASH_X64: ${{ steps.desktop.outputs.hash_x64 }}
+          DESKTOP_URL_ARM:  ${{ steps.desktop.outputs.url_arm }}
+          DESKTOP_HASH_ARM: ${{ steps.desktop.outputs.hash_arm }}
 
       - name: Update flake.lock
         run: nix flake update nixpkgs
@@ -81,15 +150,14 @@ jobs:
       - name: Open PR if anything changed
         uses: peter-evans/create-pull-request@v6
         with:
-          commit-message: "chore: update antigravity-cli to ${{ steps.update.outputs.version }}"
-          title: "chore: update antigravity-cli to ${{ steps.update.outputs.version }}"
+          commit-message: "chore: update packages (cli ${{ steps.cli.outputs.version }}, desktop ${{ steps.desktop.outputs.version }})"
+          title: "chore: update packages (cli ${{ steps.cli.outputs.version }}, desktop ${{ steps.desktop.outputs.version }})"
           body: |
-            Automated version bump for `antigravity-cli`.
+            Automated version bump.
 
-            | | Value |
-            |---|---|
-            | **Version** | `${{ steps.update.outputs.version }}` |
-            | **x86_64 URL** | `${{ steps.update.outputs.url_x64 }}` |
-            | **aarch64 URL** | `${{ steps.update.outputs.url_arm }}` |
-          branch: "auto-update/cli-${{ steps.update.outputs.version }}"
+            | Package | Version | x86_64 URL | aarch64 URL |
+            |---|---|---|---|
+            | **CLI** | `${{ steps.cli.outputs.version }}` | `${{ steps.cli.outputs.url_x64 }}` | `${{ steps.cli.outputs.url_arm }}` |
+            | **Desktop** | `${{ steps.desktop.outputs.version }}` | `${{ steps.desktop.outputs.url_x64 }}` | `${{ steps.desktop.outputs.url_arm }}` |
+          branch: "auto-update/cli-${{ steps.cli.outputs.version }}"
           delete-branch: true
