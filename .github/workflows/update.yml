@@ -76,7 +76,7 @@ jobs:
           HASH_ARM: ${{ steps.update.outputs.hash_arm }}
 
       - name: Update flake.lock
-        run: nix flake update
+        run: nix flake update nixpkgs
 
       - name: Open PR if anything changed
         uses: peter-evans/create-pull-request@v6
