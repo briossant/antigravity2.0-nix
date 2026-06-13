@@ -2,8 +2,8 @@
 
 [![CI](https://github.com/briossant/antigravity2.0-nix/actions/workflows/ci.yml/badge.svg)](https://github.com/briossant/antigravity2.0-nix/actions/workflows/ci.yml)
 [![Auto-update](https://github.com/briossant/antigravity2.0-nix/actions/workflows/update.yml/badge.svg)](https://github.com/briossant/antigravity2.0-nix/actions/workflows/update.yml)
-![CLI version](https://img.shields.io/badge/agy-1.0.0-blue)
-![Desktop version](https://img.shields.io/badge/antigravity-2.0.0-blue)
+![CLI version](https://img.shields.io/badge/agy-1.0.8-blue)
+![Desktop version](https://img.shields.io/badge/antigravity-100.0.0-blue)
 ![License](https://img.shields.io/github/license/briossant/antigravity2.0-nix)
 
 Nix flake for **Google Antigravity 2.0** — the agent-first development platform announced at Google I/O 2026.
