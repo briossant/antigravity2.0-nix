@@ -24,18 +24,18 @@
           # -------------------------------------------------------------- #
           cliSrcs = {
             x86_64-linux = {
-              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.3-6260531212976128/linux-x64/cli_linux_x64.tar.gz";
-              hash = "sha256-BH02Ndl7Su7MDcM79SfYQRF50VRDAwA+ifw8uDsNBGI=";
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.6-6458082025406464/linux-x64/cli_linux_x64.tar.gz";
+              hash = "sha256-Pq5VJ4HTBUt4IULjz+e+c+O9BoxzakMspvGtqkDxngc=";
             };
             aarch64-linux = {
-              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.3-6260531212976128/linux-arm/cli_linux_arm64.tar.gz";
-              hash = "sha256-J67B3WJw3UrMb/7kJdjX8oqJaI18ARkf1egM5t/rje0=";
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.6-6458082025406464/linux-arm/cli_linux_arm64.tar.gz";
+              hash = "sha256-vmMD1LiRp5RXym7Raa/y79POtpQ1RjToXvWMiDuuZzk=";
             };
           };
 
           antigravity-cli = pkgs.stdenv.mkDerivation {
             pname = "antigravity-cli";
-            version = "1.0.3";
+            version = "1.0.6";
 
             src = pkgs.fetchurl cliSrcs.${system};
 
@@ -115,13 +115,13 @@
 
           desktopSrcs = {
             x86_64-linux = {
-              url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.0-6324554176528384/linux-x64/Antigravity.tar.gz";
-              hash = "sha256-FLyctIClvo+zt9w+Kwzr+mbTcK1YzB4PoBFA0SBNQpc=";
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.1.1-5340579685597184/linux-x64/Antigravity.tar.gz";
+              hash = "sha256-wxlEHwwIRJDqnH5UAFHMhrKr619//W+/hDS+7SrEweQ=";
               sourceRoot = "Antigravity-x64";
             };
             aarch64-linux = {
-              url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.0-6324554176528384/linux-arm/Antigravity.tar.gz";
-              hash = "sha256-Qt9fSfwg2p3weW5/aJENqGh/Awr1PY2ISgp/oiiFceA=";
+              url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.1.1-5340579685597184/linux-arm/Antigravity.tar.gz";
+              hash = "sha256-4ewON9VxMoEjyjnteSB6VISeIDN4sdfPCi4hqnPX1+k=";
               sourceRoot = "Antigravity-arm64";
             };
           };
@@ -130,7 +130,7 @@
             pkgs.lib.makeOverridable ({ passwordStore ? "basic" }:
               pkgs.stdenv.mkDerivation {
                 pname = "antigravity-desktop";
-                version = "2.0.0";
+                version = "2.1.1";
 
                 src = pkgs.fetchurl {
                   inherit (desktopSrcs.${system}) url hash;
